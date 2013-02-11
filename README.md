@@ -13,6 +13,11 @@ Download
 
 *   [Version 0.0.1](https://github.com/wdavidw/flume/raw/master/lib/adaltas-flume-0.0.1-SNAPSHOT.jar)
 
+Notes
+-----
+
+The JSON serializer as been submitted as [FLUME-1909](https://issues.apache.org/jira/browse/FLUME-1909) to the Flume Jira.
+
 Build
 -----
 
