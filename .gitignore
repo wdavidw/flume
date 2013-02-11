@@ -1,3 +1,4 @@
+/conf/settings.xml
 /target
 .*
 !.gitignore
