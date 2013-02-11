@@ -20,7 +20,10 @@ package com.adaltas.flume.serialization;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -28,9 +31,14 @@ import org.apache.flume.serialization.EventSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 /**
- * This class simply writes the body of the event to the output stream
- * and appends a newline after each event.
+ * This class simply writes the header properties and body of the event to the output stream
+ * and appends a newline after each event. The "columns" configuration allows
+ * to list and order the columns to write. The "format" configuration accept "NATIVE" 
+ * and "CSV". In the case of the "CSV" serialization, the fields are space delimited 
+ * and the implementation is extremely simple without any escaping.
  */
 public class HeaderAndBodyTextEventSerializer implements EventSerializer {
 
@@ -42,8 +50,8 @@ public class HeaderAndBodyTextEventSerializer implements EventSerializer {
   private final boolean APPEND_NEWLINE_DFLT = true;
   private final String COLUMNS = "columns";
   private final String COLUMNS_DFLT = null;
-  private final String FORMAT = "columns";
-  private final String FORMAT_DFLT = "CSV";
+  private final String FORMAT = "format";
+  private final String FORMAT_DFLT = "NATIVE";
 
   private final OutputStream out;
   private final boolean appendNewline;
@@ -79,8 +87,30 @@ public class HeaderAndBodyTextEventSerializer implements EventSerializer {
 
   @Override
   public void write(Event e) throws IOException {
-    out.write((e.getHeaders() + " ").getBytes());
-    out.write(e.getBody());
+		Map<String,String> originalHeaders = e.getHeaders();
+		Map<String,String> headers;
+		if(this.columns != null){
+			headers = new LinkedHashMap<String,String>();
+			// Keys to keep
+			StringTokenizer tok = new StringTokenizer(this.columns);
+			while(tok.hasMoreTokens()){
+				String key = tok.nextToken();
+				headers.put(key, originalHeaders.get(key));
+			}
+		}else{
+			// If json, we need a copy since we'll add the body
+			headers = originalHeaders;
+		}
+		if(this.format == "NATIVE"){
+			out.write((headers + " ").getBytes());
+	    out.write(e.getBody());
+		}else if(this.format == "CSV"){
+	    for(Map.Entry<String, String> entry : headers.entrySet()){
+	    	out.write(entry.getValue().getBytes());
+	    	out.write(',');
+	    }
+	    out.write(e.getBody());
+		}
     if (appendNewline) {
       out.write('\n');
     }

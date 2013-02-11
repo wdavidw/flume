@@ -102,4 +102,66 @@ public class TestHeaderAndBodyTextEventSerializer {
     FileUtils.forceDelete(testFile);
   }
 
+  @Test
+  public void testCSV() throws FileNotFoundException, IOException {
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("header1", "value1");
+		headers.put("header2", "value2");
+		
+		OutputStream out = new FileOutputStream(testFile);
+		Context context = new Context();
+		context.put("format", "CSV");
+		EventSerializer serializer =
+		    EventSerializerFactory.getInstance("com.adaltas.flume.serialization.HeaderAndBodyTextEventSerializer$Builder", context, out);
+		serializer.afterCreate();
+		serializer.write(EventBuilder.withBody("event 1", Charsets.UTF_8, headers));
+		serializer.write(EventBuilder.withBody("event 2", Charsets.UTF_8, headers));
+		serializer.write(EventBuilder.withBody("event 3", Charsets.UTF_8, headers));
+		serializer.flush();
+		serializer.beforeClose();
+		out.flush();
+		out.close();
+		
+		BufferedReader reader = new BufferedReader(new FileReader(testFile));
+		Assert.assertEquals("value2,value1,event 1", reader.readLine());
+		Assert.assertEquals("value2,value1,event 2", reader.readLine());
+		Assert.assertEquals("value2,value1,event 3", reader.readLine());
+		Assert.assertNull(reader.readLine());
+		reader.close();
+		
+		FileUtils.forceDelete(testFile);
+  }
+
+  @Test
+  public void testCSVAndColumns() throws FileNotFoundException, IOException {
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("header1", "value1");
+		headers.put("header2", "value2");
+		headers.put("header3", "value3");
+		
+		OutputStream out = new FileOutputStream(testFile);
+		Context context = new Context();
+		context.put("format", "CSV");
+		context.put("columns", "header3 header2");
+		EventSerializer serializer =
+		    EventSerializerFactory.getInstance("com.adaltas.flume.serialization.HeaderAndBodyTextEventSerializer$Builder", context, out);
+		serializer.afterCreate();
+		serializer.write(EventBuilder.withBody("event 1", Charsets.UTF_8, headers));
+		serializer.write(EventBuilder.withBody("event 2", Charsets.UTF_8, headers));
+		serializer.write(EventBuilder.withBody("event 3", Charsets.UTF_8, headers));
+		serializer.flush();
+		serializer.beforeClose();
+		out.flush();
+		out.close();
+		
+		BufferedReader reader = new BufferedReader(new FileReader(testFile));
+		Assert.assertEquals("value3,value2,event 1", reader.readLine());
+		Assert.assertEquals("value3,value2,event 2", reader.readLine());
+		Assert.assertEquals("value3,value2,event 3", reader.readLine());
+		Assert.assertNull(reader.readLine());
+		reader.close();
+		
+		FileUtils.forceDelete(testFile);
+  }
+
 }
