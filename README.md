@@ -11,7 +11,7 @@ Note, Maven 3 must be installed on your system.
 Download
 --------
 
-*   [Version 0.0.1](https://github.com/wdavidw/flume/blob/master/lib/adaltas-flume-0.0.1-SNAPSHOT.jar)
+*   [Version 0.0.1](https://github.com/wdavidw/flume/raw/master/lib/adaltas-flume-0.0.1-SNAPSHOT.jar)
 
 Build
 -----
