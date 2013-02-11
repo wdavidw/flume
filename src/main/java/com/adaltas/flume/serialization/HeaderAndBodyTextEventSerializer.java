@@ -101,15 +101,17 @@ public class HeaderAndBodyTextEventSerializer implements EventSerializer {
 			// If json, we need a copy since we'll add the body
 			headers = originalHeaders;
 		}
-		if(this.format == "NATIVE"){
+		if(this.format.equals("NATIVE")){
 			out.write((headers + " ").getBytes());
 	    out.write(e.getBody());
-		}else if(this.format == "CSV"){
+		}else if(this.format.equals("CSV")){
 	    for(Map.Entry<String, String> entry : headers.entrySet()){
 	    	out.write(entry.getValue().getBytes());
 	    	out.write(',');
 	    }
 	    out.write(e.getBody());
+		}else{
+			throw new IOException("Invalid format "+this.format);
 		}
     if (appendNewline) {
       out.write('\n');
